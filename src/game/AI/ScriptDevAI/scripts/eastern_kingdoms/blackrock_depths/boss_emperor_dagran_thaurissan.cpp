@@ -27,10 +27,10 @@ EndScriptData */
 enum eEmperor
 {
     FACTION_NEUTRAL             = 734,
-    YELL_AGGRO_1                = -1230001,
-    YELL_AGGRO_2                = -1230064,
-    YELL_AGGRO_3                = -1230065,
-    YELL_SLAY                   = -1230002,
+    YELL_AGGRO_1                = 5457 ,//-1230001,
+    YELL_AGGRO_2                = -1230064,//no BroadcastText
+    YELL_AGGRO_3                = -1230065,//no BroadcastText
+    YELL_SLAY                   = -1230002,//5431
 
     SPELL_HANDOFTHAURISSAN      = 17492,
     SPELL_AVATAROFFLAME         = 15636
@@ -59,7 +59,7 @@ struct boss_emperor_dagran_thaurissanAI : public ScriptedAI
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(YELL_AGGRO_1, m_creature); break;
+            case 0: DoBroadcastText(YELL_AGGRO_1, m_creature); break;
             case 1: DoScriptText(YELL_AGGRO_2, m_creature); break;
             case 2: DoScriptText(YELL_AGGRO_3, m_creature); break;
         }
@@ -87,7 +87,7 @@ struct boss_emperor_dagran_thaurissanAI : public ScriptedAI
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
-        DoScriptText(YELL_SLAY, m_creature);
+        DoBroadcastText(YELL_SLAY, m_creature);
     }
 
     void UpdateAI(const uint32 uiDiff) override

@@ -26,7 +26,7 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                       = -1230034,
+    SAY_AGGRO                       = 25921 ,//-1230034,
 
     // spells
     SPELL_DIREBREW_DISARM           = 47310,

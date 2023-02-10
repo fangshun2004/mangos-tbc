@@ -106,7 +106,7 @@ static const float aGuardSpawnPositions[2][4] =
 
 enum
 {
-    SAY_GUARD_AGGRO                    = -1230043
+    SAY_GUARD_AGGRO                    = 5271 ,//-1230043
 };
 
 // Two NPCs spawn when AT-1786 is triggered
@@ -126,7 +126,8 @@ bool AreaTrigger_at_shadowforge_bridge(Player* pPlayer, AreaTriggerEntry const* 
         {
             pMasterGuard->SetWalk(false);
             pMasterGuard->GetMotionMaster()->MoveWaypoint();
-            DoDisplayText(pMasterGuard, SAY_GUARD_AGGRO, pPlayer);
+            //DoDisplayText(pMasterGuard, SAY_GUARD_AGGRO, pPlayer);
+            DoBroadcastText(SAY_GUARD_AGGRO, pMasterGuard, pPlayer);
             float fX, fY, fZ;
             pPlayer->GetContactPoint(pMasterGuard, fX, fY, fZ);
             pMasterGuard->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
@@ -151,12 +152,12 @@ bool AreaTrigger_at_shadowforge_bridge(Player* pPlayer, AreaTriggerEntry const* 
 
 enum
 {
-    SAY_START_1                     = -1230004,
-    SAY_START_2                     = -1230005,
-    SAY_OPEN_EAST_GATE              = -1230006,
-    SAY_SUMMON_BOSS_1               = -1230007,
-    SAY_SUMMON_BOSS_2               = -1230008,
-    SAY_OPEN_NORTH_GATE             = -1230009,
+    SAY_START_1                     = 5442 ,//-1230004,
+    SAY_START_2                     = 5441 ,//-1230005,
+    SAY_OPEN_EAST_GATE              = 5443 ,//-1230006,
+    SAY_SUMMON_BOSS_1               = 5445 ,//-1230007,
+    SAY_SUMMON_BOSS_2               = 5444 ,//-1230008,
+    SAY_OPEN_NORTH_GATE             = 5446 ,//-1230009,
 
     NPC_GRIMSTONE                   = 10096,
     DATA_BANNER_BEFORE_EVENT        = 5,
@@ -342,12 +343,12 @@ struct npc_grimstoneAI : public npc_escortAI
         switch (uiPointId)
         {
             case 1:                                         // Middle reached first time
-                DoScriptText(SAY_START_1, m_creature);
+                DoBroadcastText(SAY_START_1, m_creature);
                 SetEscortPaused(true);
                 m_uiEventTimer = 5000;
                 break;
             case 2:                                         // Reached wall again
-                DoScriptText(SAY_OPEN_EAST_GATE, m_creature);
+                DoBroadcastText(SAY_OPEN_EAST_GATE, m_creature);
                 SetEscortPaused(true);
                 m_uiEventTimer = 5000;
                 break;
@@ -355,10 +356,10 @@ struct npc_grimstoneAI : public npc_escortAI
                 SetEscortPaused(true);
                 break;
             case 4:                                         // Middle reached second time
-                DoScriptText(SAY_SUMMON_BOSS_1, m_creature);
+                DoBroadcastText(SAY_SUMMON_BOSS_1, m_creature);
                 break;
             case 5:                                         // Reached North Gate
-                DoScriptText(SAY_OPEN_NORTH_GATE, m_creature);
+                DoBroadcastText(SAY_OPEN_NORTH_GATE, m_creature);
                 SetEscortPaused(true);
                 m_uiEventTimer = 5000;
                 break;
@@ -413,7 +414,7 @@ struct npc_grimstoneAI : public npc_escortAI
                     case 0:
                         // Shortly after spawn, start walking
                         DoCastSpellIfCan(m_creature, SPELL_ASHCROMBES_TELEPORT_A, CAST_TRIGGERED);
-                        DoScriptText(SAY_START_2, m_creature);
+                        DoBroadcastText(SAY_START_2, m_creature);
                         m_pInstance->DoUseDoorOrButton(GO_ARENA_4);
                         // Some of the NPCs in the crowd do cheer emote at event start
                         // we randomly select 25% of the NPCs to do this
@@ -464,7 +465,7 @@ struct npc_grimstoneAI : public npc_escortAI
                         break;
                     case 8:
                         // Summoned Mobs are dead, continue event
-                        DoScriptText(SAY_SUMMON_BOSS_2, m_creature);
+                        DoBroadcastText(SAY_SUMMON_BOSS_2, m_creature);
                         m_creature->SetVisibility(VISIBILITY_ON);
                         DoCastSpellIfCan(m_creature, SPELL_ASHCROMBES_TELEPORT_A, CAST_TRIGGERED);
                         m_pInstance->DoUseDoorOrButton(GO_ARENA_1);
@@ -543,7 +544,7 @@ bool EffectDummyCreature_spell_banner_of_provocation(Unit* /*pCaster*/, uint32 u
 
 enum
 {
-    YELL_PHALANX_AGGRO    = -1230040,
+    YELL_PHALANX_AGGRO    = 5300 ,//-1230040,
 
     SPELL_THUNDERCLAP     = 15588,
     SPELL_MIGHTY_BLOW     = 14099,
@@ -598,7 +599,7 @@ struct npc_phalanxAI : public npc_escortAI
         switch (uiPointId)
         {
             case 1:
-                DoScriptText(YELL_PHALANX_AGGRO, m_creature);
+                DoBroadcastText(YELL_PHALANX_AGGRO, m_creature);
                 break;
             case 2:
                 SetEscortPaused(true);
@@ -692,10 +693,10 @@ enum
     SPELL_POTION_LOVE           = 14928,
     SPELL_NAGMARA_ROCKNOT       = 15064,
 
-    SAY_NAGMARA_1               = -1230066,
-    SAY_NAGMARA_2               = -1230067,
-    TEXTEMOTE_NAGMARA           = -1230068,
-    TEXTEMOTE_ROCKNOT           = -1230069,
+    SAY_NAGMARA_1               = 5000 ,//-1230066,
+    SAY_NAGMARA_2               = 5001 ,//-1230067,
+    TEXTEMOTE_NAGMARA           = 5002 ,//-1230068,
+    TEXTEMOTE_ROCKNOT           = 5003 ,//-1230069,
 
     QUEST_POTION_LOVE           = 4201
 };
@@ -764,7 +765,7 @@ struct npc_mistress_nagmaraAI : public ScriptedAI
                     m_creature->GetMotionMaster()->MoveIdle();
                     m_creature->SetFacingToObject(pRocknot);
                     pRocknot->SetFacingToObject(m_creature);
-                    DoScriptText(SAY_NAGMARA_1, m_creature);
+                    DoBroadcastText(SAY_NAGMARA_1, m_creature);
                     m_uiPhase++;
                     m_uiPhaseTimer = 5000;
                 }
@@ -772,7 +773,7 @@ struct npc_mistress_nagmaraAI : public ScriptedAI
                     m_creature->GetMotionMaster()->MoveFollow(pRocknot, 2.0f, 0);
                 break;
             case 2:     // Phase 2 : Nagmara is "seducing" Rocknot
-                DoScriptText(SAY_NAGMARA_2, m_creature);
+                DoBroadcastText(SAY_NAGMARA_2, m_creature);
                 m_uiPhaseTimer = 4000;
                 m_uiPhase++;
                 break;
@@ -791,8 +792,8 @@ struct npc_mistress_nagmaraAI : public ScriptedAI
                 m_pInstance->SetData(TYPE_NAGMARA, DONE);
                 break;
             case 5:     // Phase 5 : Nagmara and Rocknot are under the stair kissing (this phase repeats endlessly)
-                DoScriptText(TEXTEMOTE_NAGMARA, m_creature);
-                DoScriptText(TEXTEMOTE_ROCKNOT, pRocknot);
+                DoBroadcastText(TEXTEMOTE_NAGMARA, m_creature);
+                DoBroadcastText(TEXTEMOTE_ROCKNOT, pRocknot);
                 DoCastSpellIfCan(m_creature, SPELL_NAGMARA_ROCKNOT);
                 pRocknot->CastSpell(pRocknot, SPELL_NAGMARA_ROCKNOT, TRIGGERED_NONE);
                 m_uiPhaseTimer = 12000;
@@ -857,11 +858,11 @@ UnitAI* GetAI_npc_mistress_nagmara(Creature* pCreature)
 
 enum
 {
-    SAY_GOT_BEER       = -1230000,
-    SAY_MORE_BEER      = -1230036,
-    SAY_BARREL_1       = -1230044,
-    SAY_BARREL_2       = -1230045,
-    SAY_BARREL_3       = -1230046,
+    SAY_GOT_BEER       = 5172 ,//-1230000,
+    SAY_MORE_BEER      = 5166 ,//-1230036,
+    SAY_BARREL_1       = 5167 ,//-1230044,
+    SAY_BARREL_2       = 5168 ,//-1230045,
+    SAY_BARREL_3       = 5169 ,//-1230046,
 
     SPELL_DRUNKEN_RAGE = 14872,
 
@@ -925,16 +926,16 @@ struct npc_rocknotAI : public npc_escortAI
                 SetEscortPaused(false);
                 break;
             case 3:
-                DoScriptText(SAY_BARREL_1, m_creature);
+                DoBroadcastText(SAY_BARREL_1, m_creature);
                 break;
             case 4:
-                DoScriptText(SAY_BARREL_2, m_creature);
+                DoBroadcastText(SAY_BARREL_2, m_creature);
                 break;
             case 5:
-                DoScriptText(SAY_BARREL_2, m_creature);
+                DoBroadcastText(SAY_BARREL_2, m_creature);
                 break;
             case 6:
-                DoScriptText(SAY_BARREL_1, m_creature);
+                DoBroadcastText(SAY_BARREL_1, m_creature);
                 break;
             case 7:
                 DoCastSpellIfCan(m_creature, SPELL_DRUNKEN_RAGE, false);
@@ -1017,7 +1018,7 @@ struct npc_rocknotAI : public npc_escortAI
                 if (!m_bIsDoorOpen)
                     DoGo(GO_BAR_DOOR, GO_STATE_ACTIVE_ALTERNATIVE);
 
-                DoScriptText(SAY_BARREL_3, m_creature);
+                DoBroadcastText(SAY_BARREL_3, m_creature);
                 DoGo(GO_BAR_KEG_TRAP, GO_STATE_ACTIVE);                   // doesn't work very well, leaving code here for future
                 // spell by trap has effect61
 
@@ -1055,7 +1056,7 @@ struct npc_rocknotAI : public npc_escortAI
                 // if not, he is still accepting beers, so we want him to cheer player
                 if (m_pInstance->GetData(TYPE_ROCKNOT) == SPECIAL)
                 {
-                    DoScriptText(SAY_MORE_BEER, m_creature);
+                    DoBroadcastText(SAY_MORE_BEER, m_creature);
                     Start(false);
                 }
                 else
@@ -1090,7 +1091,7 @@ bool QuestRewarded_npc_rocknot(Player* pPlayer, Creature* pCreature, Quest const
             pInstance->SetData(TYPE_ROCKNOT, IN_PROGRESS);
 
         pCreature->SetFacingToObject(pPlayer);
-        DoScriptText(SAY_GOT_BEER, pCreature);
+        DoBroadcastText(SAY_GOT_BEER, pCreature);
         if (npc_rocknotAI* pEscortAI = dynamic_cast<npc_rocknotAI*>(pCreature->AI()))
             pEscortAI->m_uiEmoteTimer = 1500;
 
@@ -1110,35 +1111,35 @@ bool QuestRewarded_npc_rocknot(Player* pPlayer, Creature* pCreature, Quest const
 enum
 {
     // Windsor texts
-    SAY_WINDSOR_AGGRO1          = -1230011,
-    SAY_WINDSOR_AGGRO2          = -1230012,
-    SAY_WINDSOR_AGGRO3          = -1230013,
-    SAY_WINDSOR_START           = -1230014,
-    SAY_WINDSOR_CELL_DUGHAL_1   = -1230015,
-    SAY_WINDSOR_CELL_DUGHAL_3   = -1230016,
-    SAY_WINDSOR_EQUIPMENT_1     = -1230017,
-    SAY_WINDSOR_EQUIPMENT_2     = -1230018,
-    SAY_WINDSOR_EQUIPMENT_3     = -1230019,
-    SAY_WINDSOR_EQUIPMENT_4     = -1230020,
-    SAY_WINDSOR_CELL_JAZ_1      = -1230021,
-    SAY_WINDSOR_CELL_JAZ_2      = -1230022,
-    SAY_WINDSOR_CELL_SHILL_1    = -1230023,
-    SAY_WINDSOR_CELL_SHILL_2    = -1230024,
-    SAY_WINDSOR_CELL_SHILL_3    = -1230025,
-    SAY_WINDSOR_CELL_CREST_1    = -1230026,
-    SAY_WINDSOR_CELL_CREST_2    = -1230027,
-    SAY_WINDSOR_CELL_TOBIAS_1   = -1230028,
-    SAY_WINDSOR_CELL_TOBIAS_2   = -1230029,
-    SAY_WINDSOR_FREE_1          = -1230030,
-    SAY_WINDSOR_FREE_2          = -1230031,
+    SAY_WINDSOR_AGGRO1          = 5253 ,//-1230011,
+    SAY_WINDSOR_AGGRO2          = 5252 ,//-1230012,
+    SAY_WINDSOR_AGGRO3          = 5250 ,//-1230013,
+    SAY_WINDSOR_START           = 5205 ,//-1230014,
+    SAY_WINDSOR_CELL_DUGHAL_1   = 5207 ,//-1230015,
+    SAY_WINDSOR_CELL_DUGHAL_3   = 5213 ,//-1230016,
+    SAY_WINDSOR_EQUIPMENT_1     = 5214 ,//-1230017,
+    SAY_WINDSOR_EQUIPMENT_2     = 5215 ,//-1230018,
+    SAY_WINDSOR_EQUIPMENT_3     = 5216 ,//-1230019,
+    SAY_WINDSOR_EQUIPMENT_4     = 5217 ,//-1230020,
+    SAY_WINDSOR_CELL_JAZ_1      = 5222 ,//-1230021,
+    SAY_WINDSOR_CELL_JAZ_2      = 5223 ,//-1230022,
+    SAY_WINDSOR_CELL_SHILL_1    = 5224 ,//-1230023,
+    SAY_WINDSOR_CELL_SHILL_2    = 5225 ,//-1230024,
+    SAY_WINDSOR_CELL_SHILL_3    = 5227 ,//-1230025,
+    SAY_WINDSOR_CELL_CREST_1    = 5228 ,//-1230026,
+    SAY_WINDSOR_CELL_CREST_2    = 5229 ,//-1230027,
+    SAY_WINDSOR_CELL_TOBIAS_1   = 5230 ,//-1230028,
+    SAY_WINDSOR_CELL_TOBIAS_2   = 5221 ,//-1230029,
+    SAY_WINDSOR_FREE_1          = 5231 ,//-1230030,
+    SAY_WINDSOR_FREE_2          = 5232 ,//-1230031,
 
     // Additional gossips
-    SAY_DUGHAL_FREE             = -1230010,
+    SAY_DUGHAL_FREE             = 5210 ,//-1230010,
     GOSSIP_ID_DUGHAL            = -3230000,
     GOSSIP_TEXT_ID_DUGHAL       = 2846,
 
     SAY_TOBIAS_FREE_1           = -1230032,
-    SAY_TOBIAS_FREE_2           = -1230033,
+    SAY_TOBIAS_FREE_2           = -1230033,//5218
     GOSSIP_ID_TOBIAS            = -3230001,
     GOSSIP_TEXT_ID_TOBIAS       = 2847,
 
@@ -1171,9 +1172,9 @@ struct npc_marshal_windsorAI : public npc_escortAI
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_WINDSOR_AGGRO1, m_creature, pWho); break;
-            case 1: DoScriptText(SAY_WINDSOR_AGGRO2, m_creature); break;
-            case 2: DoScriptText(SAY_WINDSOR_AGGRO3, m_creature, pWho); break;
+            case 0: DoBroadcastText(SAY_WINDSOR_AGGRO1, m_creature, pWho); break;
+            case 1: DoBroadcastText(SAY_WINDSOR_AGGRO2, m_creature); break;
+            case 2: DoBroadcastText(SAY_WINDSOR_AGGRO3, m_creature, pWho); break;
         }
     }
 
@@ -1185,11 +1186,11 @@ struct npc_marshal_windsorAI : public npc_escortAI
                 if (m_pInstance)
                     m_pInstance->SetData(TYPE_QUEST_JAIL_BREAK, IN_PROGRESS);
 
-                DoScriptText(SAY_WINDSOR_START, m_creature);
+                DoBroadcastText(SAY_WINDSOR_START, m_creature);
                 break;
             case 7:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    DoScriptText(SAY_WINDSOR_CELL_DUGHAL_1, m_creature, pPlayer);
+                    DoBroadcastText(SAY_WINDSOR_CELL_DUGHAL_1, m_creature, pPlayer);
                 if (m_pInstance)
                 {
                     if (Creature* pDughal = m_pInstance->GetSingleCreatureFromStorage(NPC_DUGHAL))
@@ -1203,11 +1204,11 @@ struct npc_marshal_windsorAI : public npc_escortAI
                 break;
             case 9:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    DoScriptText(SAY_WINDSOR_CELL_DUGHAL_3, m_creature, pPlayer);
+                    DoBroadcastText(SAY_WINDSOR_CELL_DUGHAL_3, m_creature, pPlayer);
                 break;
             case 14:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    DoScriptText(SAY_WINDSOR_EQUIPMENT_1, m_creature, pPlayer);
+                    DoBroadcastText(SAY_WINDSOR_EQUIPMENT_1, m_creature, pPlayer);
                 break;
             case 15:
                 // ToDo: fix this emote!
@@ -1218,7 +1219,7 @@ struct npc_marshal_windsorAI : public npc_escortAI
                     m_pInstance->DoUseDoorOrButton(GO_JAIL_DOOR_SUPPLY);
                 break;
             case 18:
-                DoScriptText(SAY_WINDSOR_EQUIPMENT_2, m_creature);
+                DoBroadcastText(SAY_WINDSOR_EQUIPMENT_2, m_creature);
                 break;
             case 19:
                 // ToDo: fix this emote!
@@ -1235,12 +1236,12 @@ struct npc_marshal_windsorAI : public npc_escortAI
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     DoCastSpellIfCan(nullptr, SPELL_WINDSORS_FRENZY, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-                    DoScriptText(SAY_WINDSOR_EQUIPMENT_3, m_creature, pPlayer);
+                    DoBroadcastText(SAY_WINDSOR_EQUIPMENT_3, m_creature, pPlayer);
                     m_creature->SetFacingToObject(pPlayer);
                 }
                 break;
             case 23:
-                DoScriptText(SAY_WINDSOR_EQUIPMENT_4, m_creature);
+                DoBroadcastText(SAY_WINDSOR_EQUIPMENT_4, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
                     m_creature->SetFacingToObject(pPlayer);
                 break;
@@ -1250,12 +1251,12 @@ struct npc_marshal_windsorAI : public npc_escortAI
                     if (Creature* pJaz = m_pInstance->GetSingleCreatureFromStorage(NPC_JAZ))
                         m_creature->SetFacingToObject(pJaz);
                 }
-                DoScriptText(SAY_WINDSOR_CELL_JAZ_1, m_creature);
+                DoBroadcastText(SAY_WINDSOR_CELL_JAZ_1, m_creature);
                 ++m_uiEventPhase;
                 SetEscortPaused(true);
                 break;
             case 32:
-                DoScriptText(SAY_WINDSOR_CELL_JAZ_2, m_creature);
+                DoBroadcastText(SAY_WINDSOR_CELL_JAZ_2, m_creature);
                 break;
             case 35:
                 if (m_pInstance)
@@ -1263,15 +1264,15 @@ struct npc_marshal_windsorAI : public npc_escortAI
                     if (Creature* pShill = m_pInstance->GetSingleCreatureFromStorage(NPC_SHILL))
                         m_creature->SetFacingToObject(pShill);
                 }
-                DoScriptText(SAY_WINDSOR_CELL_SHILL_1, m_creature);
+                DoBroadcastText(SAY_WINDSOR_CELL_SHILL_1, m_creature);
                 ++m_uiEventPhase;
                 SetEscortPaused(true);
                 break;
             case 37:
-                DoScriptText(SAY_WINDSOR_CELL_SHILL_2, m_creature);
+                DoBroadcastText(SAY_WINDSOR_CELL_SHILL_2, m_creature);
                 break;
             case 38:
-                DoScriptText(SAY_WINDSOR_CELL_SHILL_3, m_creature);
+                DoBroadcastText(SAY_WINDSOR_CELL_SHILL_3, m_creature);
                 break;
             case 45:
                 if (m_pInstance)
@@ -1279,15 +1280,15 @@ struct npc_marshal_windsorAI : public npc_escortAI
                     if (Creature* pCrest = m_pInstance->GetSingleCreatureFromStorage(NPC_CREST))
                         m_creature->SetFacingToObject(pCrest);
                 }
-                DoScriptText(SAY_WINDSOR_CELL_CREST_1, m_creature);
+                DoBroadcastText(SAY_WINDSOR_CELL_CREST_1, m_creature);
                 ++m_uiEventPhase;
                 SetEscortPaused(true);
                 break;
             case 47:
-                DoScriptText(SAY_WINDSOR_CELL_CREST_2, m_creature);
+                DoBroadcastText(SAY_WINDSOR_CELL_CREST_2, m_creature);
                 break;
             case 49:
-                DoScriptText(SAY_WINDSOR_CELL_TOBIAS_1, m_creature);
+                DoBroadcastText(SAY_WINDSOR_CELL_TOBIAS_1, m_creature);
                 if (m_pInstance)
                 {
                     if (Creature* pTobias = m_pInstance->GetSingleCreatureFromStorage(NPC_TOBIAS))
@@ -1301,15 +1302,15 @@ struct npc_marshal_windsorAI : public npc_escortAI
                 break;
             case 51:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    DoScriptText(SAY_WINDSOR_CELL_TOBIAS_2, m_creature, pPlayer);
+                    DoBroadcastText(SAY_WINDSOR_CELL_TOBIAS_2, m_creature, pPlayer);
                 break;
             case 57:
-                DoScriptText(SAY_WINDSOR_FREE_1, m_creature);
+                DoBroadcastText(SAY_WINDSOR_FREE_1, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
                     m_creature->SetFacingToObject(pPlayer);
                 break;
             case 58:
-                DoScriptText(SAY_WINDSOR_FREE_2, m_creature);
+                DoBroadcastText(SAY_WINDSOR_FREE_2, m_creature);
                 if (m_pInstance)
                     m_pInstance->SetData(TYPE_QUEST_JAIL_BREAK, DONE);
 
@@ -1389,7 +1390,7 @@ bool GossipSelect_npc_dughal_stormwing(Player* pPlayer, Creature* pCreature, uin
         if (instance_blackrock_depths* pInstance = (instance_blackrock_depths*)pCreature->GetInstanceData())
             pInstance->SetData(TYPE_QUEST_JAIL_BREAK, SPECIAL);
 
-        DoScriptText(SAY_DUGHAL_FREE, pCreature, pPlayer);
+        DoBroadcastText(SAY_DUGHAL_FREE, pCreature, pPlayer);
         pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
         pCreature->SetWalk(false);
@@ -1422,7 +1423,7 @@ bool GossipSelect_npc_tobias_seecher(Player* pPlayer, Creature* pCreature, uint3
         if (instance_blackrock_depths* pInstance = (instance_blackrock_depths*)pCreature->GetInstanceData())
             pInstance->SetData(TYPE_QUEST_JAIL_BREAK, SPECIAL);
 
-        DoScriptText(urand(0, 1) ? SAY_TOBIAS_FREE_1 : SAY_TOBIAS_FREE_2, pCreature);
+        DoBroadcastText(urand(0, 1) ? SAY_TOBIAS_FREE_1 : SAY_TOBIAS_FREE_2, pCreature);
         pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
         pCreature->SetWalk(false);
@@ -1440,8 +1441,8 @@ bool GossipSelect_npc_tobias_seecher(Player* pPlayer, Creature* pCreature, uint3
 
 enum
 {
-    YELL_HURLEY_SPAWN      = -1230041,
-    SAY_HURLEY_AGGRO       = -1230042,
+    YELL_HURLEY_SPAWN      = 4934 ,//-1230041,
+    SAY_HURLEY_AGGRO       = 4936 ,//-1230042,
 
     // SPELL_DRUNKEN_RAGE      = 14872,
     SPELL_FLAME_BREATH     = 9573,
@@ -1491,7 +1492,7 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
     {
         uiFlameBreathTimer  = 7000;
         bIsEnraged  = false;
-        DoScriptText(SAY_HURLEY_AGGRO, m_creature);
+        DoBroadcastText(SAY_HURLEY_AGGRO, m_creature);
     }
 
     void WaypointReached(uint32 uiPointId) override
@@ -1502,7 +1503,7 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
         switch (uiPointId)
         {
             case 2:
-                DoScriptText(YELL_HURLEY_SPAWN, m_creature);
+                DoBroadcastText(YELL_HURLEY_SPAWN, m_creature);
                 SetRun(true);
                 break;
             case 6:
@@ -1574,7 +1575,7 @@ UnitAI* GetAI_npc_hurley_blackbreath(Creature* pCreature)
 
 enum
 {
-    SAY_DOOMREL_START_EVENT     = -1230003,
+    SAY_DOOMREL_START_EVENT     = 4894 ,//-1230003,
     GOSSIP_ITEM_CHALLENGE       = -3230002,
     GOSSIP_TEXT_ID_CHALLENGE    = 2601,
 };
@@ -1597,7 +1598,7 @@ bool GossipSelect_boss_doomrel(Player* pPlayer, Creature* pCreature, uint32 /*ui
     {
         case GOSSIP_ACTION_INFO_DEF+1:
             pPlayer->CLOSE_GOSSIP_MENU();
-            DoScriptText(SAY_DOOMREL_START_EVENT, pCreature);
+            DoBroadcastText(SAY_DOOMREL_START_EVENT, pCreature);
             // start event
             if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
                 pInstance->SetData(TYPE_TOMB_OF_SEVEN, IN_PROGRESS);
@@ -1613,17 +1614,17 @@ bool GossipSelect_boss_doomrel(Player* pPlayer, Creature* pCreature, uint32 /*ui
 
 enum
 {
-    SAY_OOC_1                       = -1230050,
-    SAY_OOC_2                       = -1230051,
-    SAY_OOC_3                       = -1230052,
-    SAY_OOC_4                       = -1230053,
+    SAY_OOC_1                       = 5310 ,//-1230050,
+    SAY_OOC_2                       = 5308 ,//-1230051,
+    SAY_OOC_3                       = 5307 ,//-1230052,
+    SAY_OOC_4                       = 5309 ,//-1230053,
 
-    YELL_STOLEN_1                   = -1230054,
-    YELL_STOLEN_2                   = -1230055,
-    YELL_STOLEN_3                   = -1230056,
-    YELL_AGRRO_1                    = -1230057,
-    YELL_AGRRO_2                    = -1230058,
-    YELL_PICKPOCKETED               = -1230059,
+    YELL_STOLEN_1                   = 5054 ,//-1230054,
+    YELL_STOLEN_2                   = 5053 ,//-1230055,
+    YELL_STOLEN_3                   = 5055 ,//-1230056,
+    YELL_AGRRO_1                    = 5060 ,//-1230057,
+    YELL_AGRRO_2                    = 5267 ,//-1230058,
+    YELL_PICKPOCKETED               = 5266 ,//-1230059,
 
     // spells
     SPELL_BANISH                    = 8994,
@@ -1703,7 +1704,7 @@ struct boss_plugger_spazzringAI : public ScriptedAI
     // Players stole one of the ale mug/roasted boar: warn them
     void WarnThief(Player* pPlayer)
     {
-        DoScriptText(aRandomYells[urand(0, 2)], m_creature);
+        DoBroadcastText(aRandomYells[urand(0, 2)], m_creature);
         m_creature->SetFacingToObject(pPlayer);
     }
 
@@ -1712,7 +1713,7 @@ struct boss_plugger_spazzringAI : public ScriptedAI
     {
         if (pPlayer)
         {
-            DoScriptText(urand(0, 1) < 1 ? YELL_AGRRO_1 : YELL_AGRRO_2, m_creature);
+            DoBroadcastText(urand(0, 1) < 1 ? YELL_AGRRO_1 : YELL_AGRRO_2, m_creature);
             m_creature->SetFacingToObject(pPlayer);
             m_creature->SetFactionTemporary(FACTION_DARK_IRON, TEMPFACTION_RESTORE_RESPAWN);
             AttackStart(pPlayer);
@@ -1769,7 +1770,7 @@ struct boss_plugger_spazzringAI : public ScriptedAI
         {
             if (m_uiOocSayTimer < uiDiff)
             {
-                DoScriptText(aRandomSays[urand(0, 3)], m_creature);
+                DoBroadcastText(aRandomSays[urand(0, 3)], m_creature);
                 m_uiOocSayTimer = urand(10, 20) * 1000;
             }
             else
@@ -1779,7 +1780,7 @@ struct boss_plugger_spazzringAI : public ScriptedAI
             {
                 if (m_uiPickpocketTimer < uiDiff)
                 {
-                    DoScriptText(YELL_PICKPOCKETED, m_creature);
+                    DoBroadcastText(YELL_PICKPOCKETED, m_creature);
                     m_creature->SetFactionTemporary(FACTION_DARK_IRON, TEMPFACTION_RESTORE_RESPAWN);
                     m_uiPickpocketTimer = 0;
                 }
