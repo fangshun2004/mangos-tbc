@@ -1462,7 +1462,7 @@ void ChatHandler::ExecuteCommand(const char* text)
         case CHAT_COMMAND_UNKNOWN_SUBCOMMAND:
         {
             SendSysMessage(LANG_NO_SUBCMD);
-            ShowHelpForCommand(command->ChildCommands, text);
+            ShowHelpForCommand(command->ChildCommands, fullcmd.c_str());
             SetSentErrorMessage(true);
             break;
         }
@@ -1637,7 +1637,7 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand* table, const char* cmd)
         SendSysMessage(command->Help.c_str());
 
     if (childCommands)
-        if (ShowHelpForSubCommands(childCommands, showCommand ? showCommand->Name : ""))
+        if (ShowHelpForSubCommands(childCommands, showCommand ? showCommand->Name : oldCmd))
             return true;
 
     if (command && command->Help.empty())
