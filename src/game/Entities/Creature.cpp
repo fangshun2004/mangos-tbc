@@ -1593,6 +1593,10 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
             entry = group->GetGuidEntry(dbGuid);
     }
 
+    GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(dbGuid);
+    if (!entry && eventData)
+        entry = eventData->entry_id;
+
     if (!entry)
         return false;
 
@@ -1612,10 +1616,8 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
             dynguid = true;
     }
 
-    if (dynguid)
+    if (dynguid || newGuid == 0)
         newGuid = map->GenerateLocalLowGuid(cinfo->GetHighGuid());
-
-    GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(dbGuid);
 
     // Creature can be loaded already in map if grid has been unloaded while creature walk to another grid
     if (map->GetCreature(cinfo->GetObjectGuid(dbGuid)))
