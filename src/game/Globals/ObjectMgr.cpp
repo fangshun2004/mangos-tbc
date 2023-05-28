@@ -51,6 +51,10 @@
 #include "Entities/ItemEnchantmentMgr.h"
 #include "Loot/LootMgr.h"
 
+#include "Globals/UnitCondition.h"
+#include "Globals/CombatCondition.h"
+#include "World/WorldStateExpression.h"
+
 #include <limits>
 #include <cstdarg>
 
@@ -136,7 +140,10 @@ ObjectMgr::ObjectMgr() :
     m_MailIds("Mail ids"),
     m_PetNumbers("Pet numbers"),
     m_FirstTemporaryCreatureGuid(1),
-    m_FirstTemporaryGameObjectGuid(1)
+    m_FirstTemporaryGameObjectGuid(1),
+    m_unitConditionMgr(std::make_unique<UnitConditionMgr>()),
+    m_worldStateExpressionMgr(std::make_unique<WorldStateExpressionMgr>()),
+    m_combatConditionMgr(std::make_unique<CombatConditionMgr>(*m_unitConditionMgr, *m_worldStateExpressionMgr))
 {
 }
 
@@ -685,12 +692,6 @@ void ObjectMgr::LoadCreatureTemplates()
                 const_cast<CreatureInfo*>(cInfo)->Scale = DEFAULT_OBJECT_SCALE;
         }
 
-        if (cInfo->visibilityDistanceType >= VisibilityDistanceType::Max)
-        {
-            sLog.outErrorDb("Creature (Entry: %u) has invalid visibilityDistanceType (%u) defined in `creature_template`.", cInfo->Entry, AsUnderlyingType(cInfo->visibilityDistanceType));
-            const_cast<CreatureInfo*>(cInfo)->visibilityDistanceType = VisibilityDistanceType::Normal;
-        }
-
         if (cInfo->StringID1 && !sScriptMgr.ExistsStringId(cInfo->StringID1))
         {
             sLog.outErrorDb("Table creature_template entry %u StringId1 %u does not exist. Setting to 0.", cInfo->Entry, cInfo->StringID1);
@@ -1013,7 +1014,7 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
     std::shared_ptr<CreatureSpellListContainer> newContainer = std::make_shared<CreatureSpellListContainer>();
     uint32 count = 0;
 
-    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id, Type, Param1, Param2, Param3, Comments FROM creature_spell_targeting"));
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id, Type, Param1, Param2, Param3, UnitCondition, Comments FROM creature_spell_targeting"));
     if (result)
     {
         do
@@ -1033,7 +1034,8 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
             target.Param1 = fields[2].GetUInt32();
             target.Param2 = fields[3].GetUInt32();
             target.Param3 = fields[4].GetUInt32();
-            target.Comment = fields[5].GetCppString();
+            target.UnitCondition = fields[5].GetInt32();
+            target.Comment = fields[6].GetCppString();
             newContainer->targeting[target.Id] = target;
         } while (result->NextRow());
     }
@@ -1060,7 +1062,7 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
         } while (result->NextRow());
     }
 
-    result.reset(WorldDatabase.Query("SELECT Id, Position, SpellId, Flags, TargetId, ScriptId, Availability, Probability, InitialMin, InitialMax, RepeatMin, RepeatMax FROM creature_spell_list"));
+    result.reset(WorldDatabase.Query("SELECT Id, Position, SpellId, Flags, CombatCondition, TargetId, ScriptId, Availability, Probability, InitialMin, InitialMax, RepeatMin, RepeatMax FROM creature_spell_list"));
     if (result)
     {
         do
@@ -1071,6 +1073,7 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
             spell.Position = fields[1].GetUInt32();
             spell.SpellId = fields[2].GetUInt32();
             spell.Flags = fields[3].GetUInt32();
+            spell.CombatCondition = fields[4].GetUInt32();
 
             SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell.SpellId);
             if (!spellInfo && spell.SpellId != 2) // 2 is attack which is hardcoded in client
@@ -1085,7 +1088,7 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
                 continue;
             }
 
-            uint32 targetId = fields[4].GetUInt32();
+            uint32 targetId = fields[5].GetUInt32();
             auto itr = newContainer->targeting.find(targetId);
             if (itr == newContainer->targeting.end())
             {
@@ -1094,13 +1097,13 @@ std::shared_ptr<CreatureSpellListContainer> ObjectMgr::LoadCreatureSpellLists()
             }
             spell.Target = &(*itr).second;
 
-            spell.ScriptId = fields[5].GetUInt32();
-            spell.Availability = fields[6].GetUInt32();
-            spell.Probability = fields[7].GetUInt32();
-            spell.InitialMin = fields[8].GetUInt32();
-            spell.InitialMax = fields[9].GetUInt32();
-            spell.RepeatMin = fields[10].GetUInt32();
-            spell.RepeatMax = fields[11].GetUInt32();
+            spell.ScriptId = fields[6].GetUInt32();
+            spell.Availability = fields[7].GetUInt32();
+            spell.Probability = fields[8].GetUInt32();
+            spell.InitialMin = fields[9].GetUInt32();
+            spell.InitialMax = fields[10].GetUInt32();
+            spell.RepeatMin = fields[11].GetUInt32();
+            spell.RepeatMax = fields[12].GetUInt32();
             spell.DisabledForAI = !spellInfo || spellInfo->HasAttribute(SPELL_ATTR_EX_NO_AUTOCAST_AI);
             newContainer->spellLists[spell.Id].Spells.emplace(spell.Position, spell);
         } while (result->NextRow());
@@ -1472,8 +1475,8 @@ void ObjectMgr::LoadSpawnGroups()
         }
     }
 
-    m_spawnGroupEntries = newContainer;
-    sLog.outString(">> Loaded %u spawn_group definitions", uint32(m_spawnGroupEntries->spawnGroupMap.size()));
+    m_spawnGroupContainer = newContainer;
+    sLog.outString(">> Loaded %u spawn_group definitions", uint32(m_spawnGroupContainer->spawnGroupMap.size()));
     sLog.outString();
 }
 
@@ -1945,13 +1948,13 @@ void ObjectMgr::LoadCreatures()
     uint32 count = 0;
     //                                                0                       1   2
     QueryResult* result = WorldDatabase.Query("SELECT creature.guid, creature.id, map,"
-                          //   3             4           5           6           7            8              9                10
-                          "equipment_id, position_x, position_y, position_z, orientation, spawntimesecsmin, spawntimesecsmax, spawndist,"
-                          //   11         12        13
+                          //        3           4           5           6            7              8                9
+                          "position_x, position_y, position_z, orientation, spawntimesecsmin, spawntimesecsmax, spawndist,"
+                          //   10         11        12
                           "MovementType, spawnMask, event,"
-                          //   14                        15
+                          //   13                        14
                           "pool_creature.pool_entry, pool_creature_template.pool_entry,"
-                          //   16
+                          //   15
                           "creature_spawn_data.id "
                           "FROM creature "
                           "LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid "
@@ -2018,21 +2021,20 @@ void ObjectMgr::LoadCreatures()
 
         data.id                 = entry;
         data.mapid              = fields[ 2].GetUInt32();
-        data.equipmentId        = fields[ 3].GetUInt32();
-        data.posX               = fields[ 4].GetFloat();
-        data.posY               = fields[ 5].GetFloat();
-        data.posZ               = fields[ 6].GetFloat();
-        data.orientation        = fields[ 7].GetFloat();
-        data.spawntimesecsmin   = fields[ 8].GetUInt32();
-        data.spawntimesecsmax   = fields[ 9].GetUInt32();
-        data.spawndist          = fields[10].GetFloat();
-        data.movementType       = fields[11].GetUInt8();
-        data.spawnMask          = fields[12].GetUInt8();
-        data.gameEvent          = fields[13].GetInt16();
-        data.GuidPoolId         = fields[14].GetInt16();
-        data.EntryPoolId        = fields[15].GetInt16();
+        data.posX               = fields[ 3].GetFloat();
+        data.posY               = fields[ 4].GetFloat();
+        data.posZ               = fields[ 5].GetFloat();
+        data.orientation        = fields[ 6].GetFloat();
+        data.spawntimesecsmin   = fields[ 7].GetUInt32();
+        data.spawntimesecsmax   = fields[ 8].GetUInt32();
+        data.spawndist          = fields[ 9].GetFloat();
+        data.movementType       = fields[10].GetUInt8();
+        data.spawnMask          = fields[11].GetUInt8();
+        data.gameEvent          = fields[12].GetInt16();
+        data.GuidPoolId         = fields[13].GetInt16();
+        data.EntryPoolId        = fields[14].GetInt16();
         data.spawnTemplate      = GetCreatureSpawnTemplate(0);
-        uint32 spawnDataEntry   = fields[16].GetUInt32();
+        uint32 spawnDataEntry   = fields[15].GetUInt32();
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
         if (!mapEntry)
@@ -2069,20 +2071,6 @@ void ObjectMgr::LoadCreatures()
         {
             sLog.outErrorDb("Table `creature` have creature (GUID: %u) that listed as heroic template (entry: %u) in `creature_template`, skipped.", guid, data.id);
             continue;
-        }
-
-        if (data.equipmentId > 0)                           // -1 no equipment, 0 use default
-        {
-            if (!GetEquipmentInfo(data.equipmentId) && !GetEquipmentInfoRaw(data.equipmentId))
-            {
-                sLog.outErrorDb("Table `creature` have creature (Entry: %u) with equipment_id %u not found in table `creature_equip_template` or `creature_equip_template_raw`, set to no equipment.", data.id, data.equipmentId);
-                data.equipmentId = -1;
-            }
-            if (cInfo && data.equipmentId == cInfo->EquipmentTemplateId)
-            {
-                sLog.outErrorDb("Table `creature` has creature (GUID: %u, Entry: %u) with equipment_id %u already defined in creature_template table", guid, data.id, data.equipmentId); 
-                data.equipmentId = 0;
-            }
         }
 
         if (data.spawndist < 0.0f)
@@ -8138,6 +8126,29 @@ void ObjectMgr::LoadBroadcastTextLocales()
     sLog.outString();
 }
 
+std::tuple<std::shared_ptr<std::map<int32, UnitConditionEntry>>, std::shared_ptr<std::map<int32, WorldStateExpressionEntry>>, std::shared_ptr<std::map<int32, CombatConditionEntry>>> ObjectMgr::LoadConditionsAndExpressions()
+{
+    auto unitConditions = m_unitConditionMgr->Load();
+    auto worldstateExpressions = m_worldStateExpressionMgr->Load();
+    auto combatConditions = m_combatConditionMgr->Load();
+    return { unitConditions , worldstateExpressions, combatConditions };
+}
+
+std::shared_ptr<std::map<int32, UnitConditionEntry>> ObjectMgr::GetUnitConditions()
+{
+    return m_unitConditionMgr->Get();
+}
+
+std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> ObjectMgr::GetWorldStateExpressions()
+{
+    return m_worldStateExpressionMgr->Get();
+}
+
+std::shared_ptr<std::map<int32, CombatConditionEntry>> ObjectMgr::GetCombatConditions()
+{
+    return m_combatConditionMgr->Get();
+}
+
 void ObjectMgr::DeleteCreatureData(uint32 guid)
 {
     // remove mapid*cellid -> guid_set map
@@ -8873,6 +8884,21 @@ bool ObjectMgr::IsConditionSatisfied(uint32 conditionId, WorldObject const* targ
         return condition->Meets(target, map, source, conditionSourceType);
 
     return false;
+}
+
+bool ObjectMgr::IsWorldStateExpressionSatisfied(int32 expressionId, Unit const* source)
+{
+    return m_worldStateExpressionMgr->Meets(source, expressionId);
+}
+
+bool ObjectMgr::IsUnitConditionSatisfied(int32 conditionId, Unit const* source, Unit const* target)
+{
+    return m_unitConditionMgr->Meets(source, target, conditionId);
+}
+
+bool ObjectMgr::IsCombatConditionSatisfied(int32 conditionId, Unit const* source, float range)
+{
+    return m_combatConditionMgr->Meets(source, conditionId, range);
 }
 
 bool ObjectMgr::CheckDeclinedNames(const std::wstring& mainpart, DeclinedName const& names)

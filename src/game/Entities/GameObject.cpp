@@ -298,8 +298,8 @@ bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map,
     if (InstanceData* iData = map->GetInstanceData())
         iData->OnObjectCreate(this);
 
-    // Check if GameObject is Large
-    if (GetGOInfo()->IsLargeGameObject())
+    // Check if GameObject is Large, skip if map has same or better visibility (e.g. Battleground)
+    if (GetGOInfo()->IsLargeGameObject() && GetVisibilityData().GetVisibilityDistance() < VISIBILITY_DISTANCE_LARGE)
         GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Large);
 
     if (GetEntry() == 187039) // Smuggled Mana Cell - only GO in phase in TBC
@@ -483,8 +483,8 @@ void GameObject::Update(const uint32 diff)
                                 {
                                     case 1: // friendly
                                     {
-                                        MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(this, nullptr, radius);
-                                        MaNGOS::UnitSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> checker(target, u_check);
+                                        MaNGOS::AnySpellAssistableUnitInObjectRangeCheck u_check(this, nullptr, radius);
+                                        MaNGOS::UnitSearcher<MaNGOS::AnySpellAssistableUnitInObjectRangeCheck> checker(target, u_check);
                                         Cell::VisitAllObjects(this, checker, radius);
                                         break;
                                     }
@@ -858,6 +858,10 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
         sLog.outErrorDb("Gameobject (GUID: %u) not found in table `gameobject`, can't load. ", dbGuid);
         return false;
     }
+
+    // Gameobject can be loaded already in map if grid has been unloaded while gameobject moves to another grid
+    if (map->GetGameObject(dbGuid))
+        return false;
 
     uint32 entry = forcedEntry ? forcedEntry : data->id;
     // uint32 map_id = data->mapid;                         // already used before call

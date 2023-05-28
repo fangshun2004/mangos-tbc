@@ -144,7 +144,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_originalEntry(0), m_gameEventVendorId(0),
     m_immunitySet(UINT32_MAX), m_ai(nullptr),
     m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false),
-    m_noXP(false), m_noLoot(false), m_noReputation(false), m_noWoundedSlowdown(false), m_ignoringFeignDeath(false), m_noWeaponSkillGain(false),
+    m_settings(this),
     m_countSpawns(false),
     m_creatureGroup(nullptr), m_imposedCooldown(false),
     m_creatureInfo(nullptr)
@@ -203,10 +203,6 @@ void Creature::AddToWorld()
     // Make active if required
     if (sWorld.isForceLoadMap(GetMapId()) || (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE))
         SetActiveObjectState(true);
-
-    // Check if visibility distance different
-    if (GetCreatureInfo()->visibilityDistanceType != VisibilityDistanceType::Normal)
-        GetVisibilityData().SetVisibilityDistanceOverride(GetCreatureInfo()->visibilityDistanceType);
 
     if (m_countSpawns)
         GetMap()->AddToSpawnCount(GetObjectGuid());
@@ -411,7 +407,7 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
         else if (eventData->entry_id)
             LoadEquipment(cinfo->EquipmentTemplateId, true);     // use changed entry default template
     }
-    else if (!data || (data->equipmentId == 0 && data->spawnTemplate->equipmentId == -1))
+    else if (!data || (data->spawnTemplate->equipmentId == -1))
     {
         if (cinfo->EquipmentTemplateId == 0)
             LoadEquipment(normalInfo->EquipmentTemplateId, true); // use default from normal template if diff does not have any
@@ -426,8 +422,6 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
             if (data->spawnTemplate->equipmentId != 0)
                 LoadEquipment(data->spawnTemplate->equipmentId);
         }
-        else if (data->equipmentId != -1)
-            LoadEquipment(data->equipmentId);
     }
 
     if (eventData && eventData->vendor_id)
@@ -466,13 +460,8 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
     SetCanBlock(!(cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_BLOCK));
     SetCanDualWield((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_DUAL_WIELD_FORCED));
     SetForceAttackingCapability((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_FORCE_ATTACKING_CAPABILITY) != 0);
-    SetNoXP((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_XP_AT_KILL) != 0);
     SetCanCallForAssistance((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_CALL_ASSIST) == 0);
-    SetNoLoot(false);
     SetNoReputation(false);
-    SetNoWoundedSlowdown((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_WOUNDED_SLOWDOWN) != 0);
-    SetIgnoreFeignDeath((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_IGNORE_FEIGN_DEATH) != 0);
-    SetNoWeaponSkillGain((cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_SKILL_GAINS) != 0);
 
     SetDetectionRange(cinfo->Detection);
 
@@ -634,6 +623,9 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
 
     if (data && data->spawnTemplate->stringId)
         SetStringId(data->spawnTemplate->stringId, true);
+
+    // static flags implementation
+    m_settings.ResetStaticFlags(CreatureStaticFlags(GetCreatureInfo()->StaticFlags), CreatureStaticFlags2(GetCreatureInfo()->StaticFlags2), CreatureStaticFlags3(GetCreatureInfo()->StaticFlags3), CreatureStaticFlags4(GetCreatureInfo()->StaticFlags4));
 
     return true;
 }
@@ -906,6 +898,9 @@ bool Creature::AIM_Initialize()
 
     if (InstanceData* mapInstance = GetInstanceData())
         mapInstance->OnCreatureRespawn(this);
+
+    if (GetSettings().HasFlag(CreatureStaticFlags::CREATOR_LOOT))
+        SetLootRecipient(GetCreator());
 
     return true;
 }
@@ -1235,7 +1230,6 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask)
     data.id = GetEntry();
     data.mapid = mapid;
     data.spawnMask = spawnMask;
-    data.equipmentId = GetEquipmentId();
     data.posX = GetPositionX();
     data.posY = GetPositionY();
     data.posZ = GetPositionZ();
@@ -1260,7 +1254,6 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask)
        << data.id << ","
        << data.mapid << ","
        << static_cast<uint32>(data.spawnMask) << ","       // cast to prevent save as symbol
-       << data.equipmentId << ","
        << data.posX << ","
        << data.posY << ","
        << data.posZ << ","
@@ -1578,6 +1571,13 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
         return false;
     }
 
+    // Creature can be loaded already in map if grid has been unloaded while creature walk to another grid
+    {
+        Creature* existing = map->GetCreature(dbGuid);
+        if (existing && existing->IsAlive())
+            return false;
+    }
+
     uint32 entry = forcedEntry ? forcedEntry : data->id;
 
     // get data for dual spawn instances
@@ -1618,10 +1618,6 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
 
     if (dynguid || newGuid == 0)
         newGuid = map->GenerateLocalLowGuid(cinfo->GetHighGuid());
-
-    // Creature can be loaded already in map if grid has been unloaded while creature walk to another grid
-    if (map->GetCreature(cinfo->GetObjectGuid(dbGuid)))
-        return false;
 
     CreatureCreatePos pos(map, data->posX, data->posY, data->posZ, data->orientation);
 
@@ -1870,7 +1866,10 @@ void Creature::SetDeathState(DeathState s)
 
         ResetSpellHitCounter();
 
-        SetLootRecipient(nullptr);
+        if (GetSettings().HasFlag(CreatureStaticFlags::CREATOR_LOOT))
+            SetLootRecipient(GetCreator());
+        else
+            SetLootRecipient(nullptr);
         if (GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_RESPAWN)
             ClearTemporaryFaction();
 
@@ -2863,6 +2862,88 @@ void Creature::LockOutSpells(SpellSchoolMask schoolMask, uint32 duration)
     WorldObject::LockOutSpells(schoolMask, duration);
 }
 
+void Creature::SetNoRewards()
+{
+    SetNoXP(true);
+    SetNoLoot(true);
+    SetNoReputation(true);
+}
+
+bool Creature::IsNoXp()
+{
+    return m_settings.HasFlag(CreatureStaticFlags::NO_XP);
+}
+
+void Creature::SetNoXP(bool state)
+{
+    if (state)
+        m_settings.SetFlag(CreatureStaticFlags::NO_XP);
+    else
+        m_settings.RemoveFlag(CreatureStaticFlags::NO_XP);
+}
+
+bool Creature::IsNoLoot()
+{
+    return m_settings.HasFlag(CreatureStaticFlags::NO_LOOT);
+}
+
+void Creature::SetNoLoot(bool state)
+{
+    if (state)
+        m_settings.SetFlag(CreatureStaticFlags::NO_LOOT);
+    else
+        m_settings.RemoveFlag(CreatureStaticFlags::NO_LOOT);
+}
+
+bool Creature::IsIgnoringFeignDeath() const
+{
+    return m_settings.HasFlag(CreatureStaticFlags2::IGNORE_FEIGN_DEATH);
+}
+
+void Creature::SetIgnoreFeignDeath(bool state)
+{
+    if (state)
+        m_settings.SetFlag(CreatureStaticFlags2::IGNORE_FEIGN_DEATH);
+    else
+        m_settings.RemoveFlag(CreatureStaticFlags2::IGNORE_FEIGN_DEATH);
+}
+
+void Creature::SetNoWoundedSlowdown(bool state)
+{
+    if (state)
+        m_settings.SetFlag(CreatureStaticFlags2::NO_WOUNDED_SLOWDOWN);
+    else
+        m_settings.RemoveFlag(CreatureStaticFlags2::NO_WOUNDED_SLOWDOWN);
+}
+
+bool Creature::IsNoWoundedSlowdown() const
+{
+    return m_settings.HasFlag(CreatureStaticFlags2::NO_WOUNDED_SLOWDOWN);
+}
+
+bool Creature::IsSlowedInCombat() const
+{
+    return !IsNoWoundedSlowdown() && HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT);
+}
+
+void Creature::SetNoWeaponSkillGain(bool state)
+{
+    if (state)
+        m_settings.SetFlag(CreatureStaticFlags2::NO_SKILL_GAINS);
+    else
+        m_settings.RemoveFlag(CreatureStaticFlags2::NO_SKILL_GAINS);
+}
+
+bool Creature::IsNoWeaponSkillGain() const
+{
+    return m_settings.HasFlag(CreatureStaticFlags2::NO_SKILL_GAINS);
+}
+
+bool Creature::IsPreventingDeath() const
+{
+    return m_settings.HasFlag(CreatureStaticFlags::UNKILLABLE);
+}
+
 bool Creature::IsCorpseExpired() const
 {
     auto now = GetMap()->GetCurrentClockTime();
@@ -2953,11 +3034,6 @@ void Creature::Heartbeat()
 
     if (GetDetectionRange() > MAX_CREATURE_ATTACK_RADIUS && CanAggro())
         ScheduleAINotify(0);
-}
-
-bool Creature::IsSlowedInCombat() const
-{
-    return !IsNoWoundedSlowdown() && HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT);
 }
 
 void Creature::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*itemProto*/, bool permanent, uint32 forcedDuration)

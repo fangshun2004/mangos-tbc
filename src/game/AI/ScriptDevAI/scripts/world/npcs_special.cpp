@@ -1424,7 +1424,7 @@ struct npc_burster_wormAI : public CombatAI
         m_creature->RemoveAurasDueToSpell(SPELL_SANDWORM_SUBMERGE_VISUAL);
         m_creature->RemoveAurasDueToSpell(m_uiBorePassive);
         SetCombatScriptStatus(true);
-        SetRootSelf(true, true);
+        SetAIImmobilizedState(true, true);
 
         if (DoCastSpellIfCan(nullptr, SPELL_STAND) == CAST_OK)
         {
@@ -2327,14 +2327,6 @@ struct npc_advanced_target_dummyAI : public ScriptedAI
     void Reset() override {}
 
     uint32 m_dieTimer;
-
-    void JustRespawned() override
-    {
-        if (!m_creature->GetSpawner())
-            return;
-
-        m_creature->SetLootRecipient(m_creature->GetSpawner());
-    }
 
     void UpdateAI(const uint32 diff) override
     {

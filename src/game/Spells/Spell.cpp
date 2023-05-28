@@ -2998,6 +2998,8 @@ SpellCastResult Spell::CheckScriptTargeting(SpellEffectIndex effIndex, uint32 ch
             // not report target not existence for triggered spells
             return foundButOutOfRange ? SPELL_FAILED_OUT_OF_RANGE : SPELL_FAILED_BAD_TARGETS;
         }
+        else if (foundButOutOfRange)
+            return SPELL_FAILED_OUT_OF_RANGE;
     }
     return SPELL_CAST_OK;
 }
@@ -7861,6 +7863,11 @@ void Spell::SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpel
         target->CastSpell(target, spellId150, TRIGGERED_NONE, nullptr, nullptr, ObjectGuid(), parentSpell);
     else if (spellId75 > 0)
         target->CastSpell(target, spellId75, TRIGGERED_NONE, nullptr, nullptr, ObjectGuid(), parentSpell);
+}
+
+bool Spell::IsInterruptible() const
+{
+    return (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_COMBAT) && m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE && CanBeInterrupted();
 }
 
 void Spell::RegisterAuraProc(Aura* aura)
