@@ -1053,6 +1053,7 @@ bool ChatHandler::HandleReloadCreatureSpellLists(char* /*args*/)
     sLog.outString("Reloading creature spell lists...");
     auto conditionsAndExpressions = sObjectMgr.LoadConditionsAndExpressions();
     auto result = sObjectMgr.LoadCreatureSpellLists();
+    sObjectMgr.LoadCreatureTemplateSpells(result);
     auto [unitConditions, worldstateExpressions, combatConditions] = conditionsAndExpressions;
     SendGlobalSysMessage("Reloaded creature spell lists.");
     if (result)
@@ -4553,7 +4554,7 @@ bool ChatHandler::HandleResetHonorCommand(char* args)
 
     target->SetHonorPoints(0);
     target->SetUInt32Value(PLAYER_FIELD_KILLS, 0);
-    target->SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 0);
+    target->SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);
     target->SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
     target->SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0);
     return true;

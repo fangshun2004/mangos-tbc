@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_s2468_01_mangos_visibility` bit(1) DEFAULT NULL
+  `required_s2470_01_mangos_worldstate_expression_spawn_group` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1442,7 +1442,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES
-(1,'Waypoint (Only GM can see it)','Visual',NULL,1,1,0,10045,0,0,0,35,1,8,8,1,1,0,0,4096,0,130,5242886,0,0,0,0,0.91,1.14286,20,0,0,0,0,0,0,-1,1,1,1,1,1,1,8,8,0,0,7,7,1.76,2.42,0,3,100,2000,2200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','');
+(1,'Waypoint (Only GM can see it)','Visual',NULL,1,1,0,10045,0,0,0,35,1,8,8,1,1,0,0,4096,0,130,5242886,0,0,0,0,0.91,1.14286,20,0,0,0,0,0,0,-1,1,1,1,1,1,1,8,8,0,0,7,7,1.76,2.42,0,3,100,2000,2200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4915,6 +4915,9 @@ CREATE TABLE `npc_trainer` (
   `reqskill` smallint(5) unsigned NOT NULL DEFAULT '0',
   `reqskillvalue` smallint(5) unsigned NOT NULL DEFAULT '0',
   `reqlevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `ReqAbility1` INT(11) UNSIGNED DEFAULT NULL,
+  `ReqAbility2` INT(11) UNSIGNED DEFAULT NULL,
+  `ReqAbility3` INT(11) UNSIGNED DEFAULT NULL,
   `condition_id` INT(11) unsigned NOT NULL default '0',
   UNIQUE KEY `entry_spell` (`entry`,`spell`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -4940,6 +4943,9 @@ CREATE TABLE `npc_trainer_template` (
   `reqskill` smallint(5) unsigned NOT NULL DEFAULT '0',
   `reqskillvalue` smallint(5) unsigned NOT NULL DEFAULT '0',
   `reqlevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `ReqAbility1` INT(11) UNSIGNED DEFAULT NULL,
+  `ReqAbility2` INT(11) UNSIGNED DEFAULT NULL,
+  `ReqAbility3` INT(11) UNSIGNED DEFAULT NULL,
   `condition_id` INT(11) unsigned NOT NULL default '0',
   UNIQUE KEY `entry_spell` (`entry`,`spell`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -12960,6 +12966,7 @@ CREATE TABLE `spawn_group`  (
   `Type` int(11) NOT NULL COMMENT 'Creature or GO spawn group',
   `MaxCount` int(11) NOT NULL DEFAULT 0 COMMENT 'Maximum total count of all spawns in a group',
   `WorldState` int(11) NOT NULL DEFAULT 0 COMMENT 'Worldstate which enables spawning of given group',
+  `WorldStateExpression` int(11) NOT NULL DEFAULT 0 COMMENT 'Worldstate expression Id',
   `Flags` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Flags for various behaviour',
   `StringId` INT(11) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`Id`)
