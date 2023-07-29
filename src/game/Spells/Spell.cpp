@@ -487,7 +487,7 @@ Spell::Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags,
 
 Spell::~Spell()
 {
-    if (m_CastItem)
+    if (!m_IsTriggeredSpell && m_CastItem)
         m_CastItem->SetUsedInSpell(false);
 }
 
@@ -2126,6 +2126,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 }
             }
             m_targets.setDestination(nextPos.x, nextPos.y, nextPos.z);
+            break;
         }
         case TARGET_LOCATION_UNIT_POSITION:
         {
@@ -7517,7 +7518,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                     if (n_offset)
                     {
                         // re-add us to the queue
-                        m_Spell->GetCaster()->m_events.AddEvent(this, m_Spell->GetDelayStart() + n_offset, false);
+                        m_Spell->GetTrueCaster()->m_events.AddEvent(this, m_Spell->GetDelayStart() + n_offset, false);
                         return false;                       // event not complete
                     }
                     // event complete
@@ -7529,7 +7530,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                 // delaying had just started, record the moment
                 m_Spell->SetDelayStart(e_time);
                 // re-plan the event for the delay moment
-                m_Spell->GetCaster()->m_events.AddEvent(this, e_time + m_Spell->GetDelayMoment(), false);
+                m_Spell->GetTrueCaster()->m_events.AddEvent(this, e_time + m_Spell->GetDelayMoment(), false);
                 return false;                               // event not complete
             }
         } break;
@@ -7542,7 +7543,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
     }
 
     // spell processing not complete, plan event on the next update interval
-    m_Spell->GetCaster()->m_events.AddEvent(this, e_time + 1, false);
+    m_Spell->GetTrueCaster()->m_events.AddEvent(this, e_time + 1, false);
     return false;                                           // event not complete
 }
 
@@ -8604,13 +8605,6 @@ bool Spell::OnCheckTarget(Unit* target, SpellEffectIndex eff) const
             if (m_caster->getThreatManager().getThreatList().size() >= 2 && target == m_caster->GetVictim())
                 return false;
             break;
-        case 39365:                                         // Thundering Storm - only hits 25-100yd range targets
-        {
-            float dist = sqrt(target->GetDistance(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), DIST_CALC_NONE));
-            if (dist < 25.f || dist > 100.f)
-                return false;
-            break;
-        }
         case 39921:                                         // Vimgol Pentagram Beam
         {
             if (target->GetTypeId() != TYPEID_UNIT || target->GetEntry() != 23040 || m_caster->GetTypeId() != TYPEID_UNIT || m_caster->GetEntry() != 23040)

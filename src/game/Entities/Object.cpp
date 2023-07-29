@@ -2160,8 +2160,8 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
                 creature->SetPower(POWER_MANA, templateData->curMana);
             if (templateData->modelId > 0)
                 creature->SetDisplayId(templateData->modelId);
-            if (templateData->equipmentId)
-                creature->LoadEquipment(templateData->equipmentId == -1 ? 0 : templateData->equipmentId, true);
+            if (templateData->equipmentId != -1)
+                creature->LoadEquipment(templateData->equipmentId, true);
             if (templateData->curHealth > 1)
                 creature->SetHealth(templateData->curHealth);
             if (templateData->curMana > 0)
@@ -3153,6 +3153,23 @@ float Position::GetDistance(Position const& other) const
     distsq += dz * dz;
 
     return distsq;
+}
+
+float Position::GetDistance2d(Position const& other) const
+{
+    float dx = GetPositionX() - other.GetPositionX();
+    float dy = GetPositionY() - other.GetPositionY();
+    float distsq = dx * dx + dy * dy;
+
+    return distsq;
+}
+
+void Position::RelocateOffset(Position const& offset)
+{
+    x = GetPositionX() + (offset.GetPositionX() * std::cos(GetPositionO()) + offset.GetPositionY() * std::sin(GetPositionO() + float(M_PI)));
+    y = GetPositionY() + (offset.GetPositionY() * std::cos(GetPositionO()) + offset.GetPositionX() * std::sin(GetPositionO()));
+    z = GetPositionZ() + offset.GetPositionZ();
+    o = GetPositionO() + offset.GetPositionO();
 }
 
 std::string Position::to_string() const

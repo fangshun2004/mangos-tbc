@@ -233,7 +233,7 @@ class CooldownContainer
         bool AddCooldown(TimePoint clockNow, uint32 spellId, uint32 duration, uint32 spellCategory = 0, uint32 categoryDuration = 0, uint32 itemId = 0, bool onHold = false)
         {
             RemoveBySpellId(spellId);
-            auto resultItr = m_spellIdMap.emplace(spellId, std::move(std::unique_ptr<CooldownData>(new CooldownData(clockNow, spellId, duration, spellCategory, categoryDuration, itemId, onHold))));
+            auto resultItr = m_spellIdMap.emplace(spellId, std::make_unique<CooldownData>(clockNow, spellId, duration, spellCategory, categoryDuration, itemId, onHold));
             // do not overwrite one permanent category cooldown with another permanent category cooldown
             if (resultItr.second && spellCategory && categoryDuration)
             {
@@ -328,6 +328,8 @@ struct Position
     bool IsEmpty() const { return x == 0.f && y == 0.f && z == 0.f; }
     float GetAngle(const float x, const float y) const;
     float GetDistance(Position const& other) const; // WARNING: Returns squared distance for performance reasons
+    float GetDistance2d(Position const& other) const; // WARNING: Returns squared distance for performance reasons
+    void RelocateOffset(Position const& offset);
     std::string to_string() const;
 };
 

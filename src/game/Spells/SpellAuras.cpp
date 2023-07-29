@@ -1959,17 +1959,6 @@ void Aura::TriggerSpell()
             }
             case 32930:                                     // Blue beam
                 return; // Never seems to go off in sniffs - hides errors
-            /*case 30502:                                   // Dark Spin - Only Effect0 s.30505 should be affect, else s.30508 doesnt work anymore
-            {
-                if (GetCaster()->GetTypeId() != TYPEID_UNIT)
-                    return;
-
-                triggerTarget = ((Creature*)GetCaster())->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, trigger_spell_id, SELECT_FLAG_PLAYER);
-                if (!triggerTarget)
-                    return;
-
-                break;
-            }*/
             case 36716:                                     // Energy Discharge
             case 38828:
             {
@@ -3272,7 +3261,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             if (Player::TeamForRace(target->getRace()) == HORDE)
             {
                 // get model for race ( in 2.2.4 no horde models in dbc field, only 0 in it
-                m_modifier.m_amount = sObjectMgr.GetModelForRace(ssEntry->modelID_A, target->getRaceMask());
+                displayId = sObjectMgr.GetModelForRace(ssEntry->modelID_A, target->getRaceMask());
             }
 
             // nothing found in above, so use default
@@ -6542,9 +6531,6 @@ void Aura::HandleAuraModPacifyAndSilence(bool apply, bool Real)
 {
     HandleAuraModPacify(apply, Real);
     HandleAuraModSilence(apply, Real);
-    if (!apply && GetId() == 42354) // Anzu - Banish
-        if (UnitAI* ai = GetTarget()->AI())
-            ai->SendAIEvent(AI_EVENT_CUSTOM_A, GetTarget(), GetTarget());
 }
 
 void Aura::HandleAuraGhost(bool apply, bool /*Real*/)

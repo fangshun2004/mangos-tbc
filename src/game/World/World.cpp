@@ -1076,6 +1076,9 @@ void World::SetInitialWorldSettings()
     sLog.outString(">>> Creature Addon Data loaded");
     sLog.outString();
 
+    sLog.outString("Loading Gameobject Template Addon Data...");
+    sObjectMgr.LoadGameObjectTemplateAddons();
+
     sLog.outString("Loading CreatureLinking Data...");      // must be after Creatures
     sCreatureLinkingMgr.LoadFromDB();
 
@@ -1688,7 +1691,7 @@ namespace MaNGOS
 
                 while (char* line = lineFromMessage(pos))
                 {
-                    auto data = std::unique_ptr<WorldPacket>(new WorldPacket());
+                    auto data = std::make_unique<WorldPacket>();
                     ChatHandler::BuildChatPacket(*data, CHAT_MSG_SYSTEM, line);
                     data_list.push_back(std::move(data));
                 }
@@ -2702,7 +2705,7 @@ uint32 World::GetAverageLatency() const
         return 0;
 
     uint32 result = 0;
-    const_cast<World*>(this)->ExecuteForAllSessions([&](WorldSession const& session)
+    ExecuteForAllSessions([&](WorldSession const& session)
     {
         result += session.GetLatency();
     });
