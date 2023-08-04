@@ -3928,31 +3928,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 -- -1 540 000 SHATTERED HALLS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1540018','Smash!','10306','1','0','0','14046','omrogg GoCombat_1'),
-('-1540019','If you nice me let you live.','10308','1','0','0','14048','omrogg GoCombat_2'),
-('-1540020','Me hungry!','10309','1','0','0','19842','omrogg GoCombat_3'),
-('-1540021','Why don''t you let me do the talking?','10317','1','0','0','14047','omrogg GoCombatDelay_1'),
-('-1540022','No, we will NOT let you live.','10318','1','0','0','16916','omrogg GoCombatDelay_2'),
-('-1540023','You''re always hungry.  That''s why we so fat!','10319','1','0','0','16919','omrogg GoCombatDelay_3'),
-('-1540024','You stay here.  Me go kill someone else!','10303','1','0','0','16898','omrogg Threat_1'),
-('-1540025','What are you doing?','10315','1','0','0','16901','omrogg Threat_2'),
-('-1540026','We kill someone else!','10302','1','0','0','16895','omrogg Threat_3'),
-('-1540027','Me not like this one...','10300','1','0','0','14043','omrogg Threat_4'),
-('-1540028','That''s not funny!','10314','1','0','0','16899','omrogg ThreatDelay1_1'),
-('-1540029','Me get bored.','10305','1','0','0','16902','omrogg ThreatDelay1_2'),
-('-1540030','I''m not done yet, idiot!','10313','1','0','0','16896','omrogg ThreatDelay1_3'),
-('-1540031','Hey, you numbskull!','10312','1','0','0','14044','omrogg ThreatDelay1_4'),
-('-1540032','Ha ha ha.','10304','1','0','0','16900','omrogg ThreatDelay2_1'),
-('-1540033','Bored? He was almost dead!','10316','1','0','0','16903','omrogg ThreatDelay2_2'),
-('-1540034','Hey!','10307','1','0','0','16917','omrogg ThreatDelay2_3'),
-('-1540035','We kill his friend!','10301','1','0','0','14045','omrogg ThreatDelay2_4'),
-('-1540036','This one die easy!','10310','1','0','0','16922','omrogg Killing_1'),
-('-1540037','I''m tired.  You kill next one!','10320','1','0','0','16921','omrogg Killing_2'),
-('-1540038','That''s because I do all the hard work!','10321','1','0','0','16923','omrogg KillingDelay_1'),
-('-1540039','This all... your fault!','10311','1','0','0','16924','omrogg YELL_DIE_L'),
-('-1540040','I... hate... you.','10322','1','0','0','16925','omrogg YELL_DIE_R'),
-('-1540041','%s enrages!','0','2','0','0','0','omrogg EMOTE_ENRAGE'),
-
 ('-1540049','The Alliance dares to intrude this far into my fortress?  Bring out the Honor Hold prisoners and call for the executioner!  They''ll pay with their lives for this trespass!','0','6','0','0','13721','kargath SAY_EXECUTE_ALLY'),
 ('-1540050','It looks like we have a ranking officer among our captives... how amusing.  Execute this green-skinned dog at once!','0','6','0','0','13727','kargath SAY_EXECUTE_HORDE'),
 
@@ -4203,68 +4178,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1550044','%s begins to cast Pyroblast!','0','3','0','0','20775','kaelthas EMOTE_PYROBLAST');
 
 -- -1 552 000 THE ARCATRAZ
-INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1552000','It is a small matter to control the mind of the weak... for I bear allegiance to powers untouched by time, unmoved by fate. No force on this world or beyond harbors the strength to bend our knee... not even the mighty Legion! ','11122','1','0','0','19112','skyriss SAY_INTRO'),
-('-1552001','Bear witness to the agent of your demise!','11123','1','0','0','19113','skyriss SAY_AGGRO'),
-('-1552002','Your fate is written.','11124','1','0','0','19813','skyriss SAY_KILL_1'),
-('-1552003','The chaos I have sown here is but a taste....','11125','1','0','0','19814','skyriss SAY_KILL_2'),
-('-1552004','You will do my bidding, weakling.','11127','1','0','0','19816','skyriss SAY_MIND_1'),
-('-1552005','Your will is no longer your own.','11128','1','0','0','19817','skyriss SAY_MIND_2'),
-('-1552006','Flee in terror.','11129','1','0','0','19818','skyriss SAY_FEAR_1'),
-('-1552007','I will show you horrors undreamed of.','11130','1','0','0','19819','skyriss SAY_FEAR_2'),
-('-1552008','We span the universe, as countless as the stars!','11131','1','0','0','19821','skyriss SAY_IMAGE'),
-('-1552009','I am merely one of... infinite multitudes.','11126','1','0','0','19815','skyriss SAY_DEATH'),
-
-('-1552010','Where in Bonzo''s Brass Buttons am I? And who are-- yaaghh, that''s one mother of a headache!','11171','1','0','6','19108','millhouse SAY_INTRO_1'),
-('-1552011','"Lowly"? I don''t care who you are, friend: no one refers to the mighty Millhouse Manastorm as "lowly"!','11172','1','0','5','19116','millhouse SAY_INTRO_2'),
-('-1552012','I just need to get some things ready first. You guys go ahead and get started. I need to summon up some water....','11173','1','0','0','19117','millhouse SAY_WATER'),
-('-1552013','Fantastic! Next, some protective spells. Yeah, now we''re cookin''!','11174','1','0','0','19119','millhouse SAY_BUFFS'),
-('-1552014','And of course I''ll need some mana. You guys are gonna love this; just wait....','11175','1','0','0','19120','millhouse SAY_DRINK'),
-('-1552015','Aaalllriiiight!! Who ordered up an extra large can of whoop-ass?','11176','1','0','0','19121','millhouse SAY_READY'),
-('-1552016','I didn''t even break a sweat on that one!','11177','1','0','0','19824','millhouse SAY_KILL_1'),
-('-1552017','You guys feel free to jump in anytime.','11178','1','0','0','19825','millhouse SAY_KILL_2'),
-('-1552018','I''m gonna light you up, sweet cheeks!','11179','1','0','0','19826','millhouse SAY_PYRO'),
-('-1552019','Ice, ice baby.','11180','1','0','0','19827','millhouse SAY_ICEBLOCK'),
-('-1552020','Heal me! For the love of all that''s holy, heal me! I''m dying!!','11181','1','0','0','19828','millhouse SAY_LOWHP'),
-('-1552021','You''ll be hearing from my lawyer!','11182','1','0','0','19829','millhouse SAY_DEATH'),
-('-1552022','Who''s bad? Who''s bad? That''s right: we bad!','11183','1','0','4','19146','millhouse SAY_COMPLETE'),
-
-('-1552023','I knew the prince would be angry, but I... I have not been myself. I had to let them out! The great one speaks to me, you see. Wait--outsiders. Kael''thas did not send you! Good... I''ll just tell the prince you released the prisoners!','11222','1','0','0','19103','mellichar YELL_INTRO1'),
-('-1552024','The naaru kept some of the most dangerous beings in existence here in these cells. Let me introduce you to another....','11223','1','0','0','19104','mellichar YELL_INTRO2'),
-('-1552025','Yes, yes... another! Your will is mine!','11224','1','0','0','19106','mellichar YELL_RELEASE1'),
-('-1552026','Behold, yet another terrifying creature of incomprehensible power!','11225','1','0','0','19107','mellichar YELL_RELEASE2A'),
-('-1552027','What is this? A lowly gnome? I will do better, oh great one.','11226','1','0','0','19109','mellichar YELL_RELEASE2B'),
-('-1552028','Anarchy! Bedlam! Oh, you are so wise! Yes, I see it now, of course!','11227','1','0','0','19110','mellichar YELL_RELEASE3'),
-('-1552029','One final cell remains. Yes, O great one, right away!','11228','1','0','0','19111','mellichar YELL_RELEASE4'),
-('-1552030','Welcome, O great one. I am your humble servant.','11229','1','0','0','19114','mellichar YELL_WELCOME'),
-
-('-1552031','It is unwise to anger me!','11086','1','0','0','19978','dalliah SAY_AGGRO'),
-('-1552032','That is much better.','11091','1','0','0','19984','dalliah SAY_HEAL_1'),
-('-1552033','Ahh... just what I needed.','11092','1','0','0','19985','dalliah SAY_HEAL_2'),
-('-1552034','Completely ineffective.  Just like someone else I know.','11087','1','0','0','19980','dalliah SAY_KILL_1'),
-('-1552035','You chose the wrong opponent.','11088','1','0','0','19981','dalliah SAY_KILL_2'),
-('-1552036','I''ll cut you to pieces!','11090','1','0','0','19983','dalliah SAY_WHIRLWIND_1'),
-('-1552037','Reap the whirlwind!','11089','1','0','0','19982','dalliah SAY_WHIRLWIND_2'),
-('-1552038','Now I''m really angry.','11093','1','0','0','19986','dalliah SAY_DEATH'),
-
-('-1552039','Have you come to kill Dalliah?  Can I watch?','11237','1','0','1','19968','soccothrates SAY_DALLIAH_AGGRO_1'),
-('-1552040','This may be the end for you, Dalliah.  What a shame that would be.','11245','1','0','1','19975','soccothrates SAY_DALLIAH_TAUNT_1'),
-('-1552041','Having problems, Dalliah?  How nice.','11244','1','0','1','19974','soccothrates SAY_DALLIAH_TAUNT_2'),
-('-1552042','I suggest a new strategy: you draw their attacks while I gather reinforcements.','11246','1','0','1','19976','soccothrates SAY_DALLIAH_TAUNT_3'),
-('-1552043','Finally!  Well done!','11247','1','0','66','19977','soccothrates SAY_DALLIAH_DEAD'),
-('-1552044','On guard!','11241','1','0','0','19971','soccothrates SAY_CHARGE_1'),
-('-1552045','Defend yourself, for all the good it will do....','11242','1','0','0','19972','soccothrates SAY_CHARGE_2'),
-('-1552046','Knew this was... the only way out.','11243','1','0','0','19973','soccothrates SAY_DEATH'),
-('-1552047','Yes, that was quite satisfying.','11239','1','0','0','19969','soccothrates SAY_KILL'),
-('-1552048','At last, a target for my frustrations!','11238','1','0','0','19967','soccothrates SAY_AGGRO'),
-
-('-1552049','Did you call on me?','11236','1','0','397','20051','soccothrates SAY_INTRO_1'),
-('-1552050','Why would I call on you?','0','1','0','396','20055','dalliah SAY_INTRO_2'),
-('-1552051','To do your heavy lifting, most likely.','0','1','0','396','20052','soccothrates SAY_INTRO_3'),
-('-1552052','When I need someone to prance around like an overstuffed peacock, I''ll call on you.','0','1','0','396','20056','dalliah SAY_INTRO_4'),
-('-1552053','Then I''ll commit myself to ignoring you.','0','1','0','396','20053','soccothrates SAY_INTRO_5'),
-('-1552054','What would you know about commitment, sheet-sah?','0','1','0','396','20057','dalliah SAY_INTRO_6'),
-('-1552055','You''re the one who should be-- Wait, we have company...','0','1','0','396','20054','soccothrates SAY_INTRO_7');
 
 -- -1 553 000 THE BOTANICA
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
@@ -4581,17 +4494,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 -- -1 565 000 GRUUL'S LAIR
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1565000','Gronn are the real power in Outland!','11367','1','0','0','20066','maulgar SAY_AGGRO'),
-('-1565001','You will not defeat the hand of Gruul!','11368','1','0','0','20067','maulgar SAY_ENRAGE'),
-('-1565002','You won''t kill next one so easy.','11369','1','0','0','20068','maulgar SAY_OGRE_DEATH1'),
-('-1565003','Pah! Does not prove anything!','11370','1','0','0','20069','maulgar SAY_OGRE_DEATH2'),
-('-1565004','I''m not afraid of you!','11371','1','0','0','20070','maulgar SAY_OGRE_DEATH3'),
-('-1565005','Good, now you fight me!','11372','1','0','0','20071','maulgar SAY_OGRE_DEATH4'),
-('-1565006','You not so tough after all!','11373','1','0','0','20072','maulgar SAY_SLAY1'),
-('-1565007','%s laughs.','11374','2','0','0','20073','maulgar SAY_SLAY2'),
-('-1565008','Maulgar is king!','11375','1','0','0','20074','maulgar SAY_SLAY3'),
-('-1565009','Gruul... will crush you.','11376','1','0','0','20075','maulgar SAY_DEATH'),
-
 ('-1565010','Come.... and die.','11355','1','0','0','20116','gruul SAY_AGGRO'),
 ('-1565011','Scurry.','11356','1','0','0','20117','gruul SAY_SLAM1'),
 ('-1565012','No escape.','11357','1','0','0','20118','gruul SAY_SLAM2'),
