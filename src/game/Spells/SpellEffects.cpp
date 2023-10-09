@@ -574,7 +574,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
         }
 
         if (damage >= 0)
-            m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, damage);
+            m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, damage, m_damageDoneMultiplier[eff_idx]);
     }
 }
 
@@ -1994,35 +1994,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
-                case 39096:                                 // Polarity Shift
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->RemoveAurasDueToSpell(39088);
-                    unitTarget->RemoveAurasDueToSpell(39091);
-
-                    // 39088 39091
-                    switch (m_scriptValue)
-                    {
-                        case 0: // first target random
-                            m_scriptValue = urand(0, 1) ? 39088 : 39091;
-                            unitTarget->CastSpell(unitTarget, m_scriptValue, TRIGGERED_OLD_TRIGGERED);
-                            break;
-                        case 39088: // second target the other
-                            m_scriptValue = 1;
-                            unitTarget->CastSpell(unitTarget, 39091, TRIGGERED_OLD_TRIGGERED);
-                            break;
-                        case 39091:
-                            m_scriptValue = 1;
-                            unitTarget->CastSpell(unitTarget, 39088, TRIGGERED_OLD_TRIGGERED);
-                            break;
-                        default: // third and later random
-                            unitTarget->CastSpell(unitTarget, urand(0, 1) ? 39088 : 39091, TRIGGERED_OLD_TRIGGERED);
-                            break;
-                    }
-                    return;
-                }
                 case 39142:                                 // Drain World Tree Dummy
                 {
                     if (!unitTarget)
@@ -3259,11 +3230,6 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)   // TODO - Use target
     if (!unitTarget || unitTarget->IsTaxiFlying())
         return;
 
-    // Target dependend on TargetB, if there is none provided, decide dependend on A
-    uint32 targetType = m_spellInfo->EffectImplicitTargetB[eff_idx];
-    if (!targetType)
-        targetType = m_spellInfo->EffectImplicitTargetA[eff_idx];
-
     // If not exist data for dest location - return
     if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
     {
@@ -3526,7 +3492,7 @@ void Spell::EffectPowerBurn(SpellEffectIndex eff_idx)
 
     new_damage = int32(new_damage * multiplier);
 
-    m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, new_damage);
+    m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, new_damage, m_damageDoneMultiplier[eff_idx]);
 
     // should use here effect POWER_DRAIN because POWER_BURN is not implemented on client
     m_spellLog.AddLog(uint32(SPELL_EFFECT_POWER_DRAIN), unitTarget->GetPackGUID(), new_damage, uint32(powertype), multiplier);
@@ -5764,7 +5730,7 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
     bonus = int32(bonus * totalDamagePercentMod);
 
     // prevent negative damage
-    m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, bonus);
+    m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, bonus, m_damageDoneMultiplier[eff_idx]);
 
     // Hemorrhage
     if (m_spellInfo->IsFitToFamily(SPELLFAMILY_ROGUE, uint64(0x0000000002000000)))
@@ -7116,28 +7082,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
             }
             break;
         }
-        case SPELLFAMILY_WARLOCK:
-        {
-            switch (m_spellInfo->Id)
-            {
-                case  6201:                                 // Healthstone creating spells
-                case  6202:
-                case  5699:
-                case 11729:
-                case 11730:
-                case 27230:
-                {
-                    if (!unitTarget)
-                        return;
-
-                    uint32 itemType = GetUsableHealthStoneItemType(unitTarget);
-                    if (itemType)
-                        DoCreateItem(eff_idx, itemType);
-                    return;
-                }
-            }
-            break;
-        }
         case SPELLFAMILY_PRIEST:
         {
             switch (m_spellInfo->Id)
@@ -7444,26 +7388,14 @@ void Spell::EffectActivateObject(SpellEffectIndex effIdx)
             switch (m_spellInfo->Id)
             {
                 case 17731:         // Onyxia - Eruption
-                case 24731:
-                case 40964:         // Fel Crystalforge: Create 1 Flask
-                case 40965:         // Fel Crystalforge: Create 5 Flasks
-                case 40968:         // Bash'ir Crystalforge: Create 1 Flask
-                case 40970:         // Bash'ir Crystalforge: Create 5 Flasks
-                case 42868:
-                case 45222:         // Zul'Aman Object Visual - This spell is a custom GO cast spell and similar to Ritual of Souls where only channel start should be sent
                     gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid());
-                    break;
-                case 36546:         // no delay meant to happen - activate trap immediately
-                case 38054:
-                case 39844:
-                    gameObjTarget->Use(m_caster, m_spellInfo);
                     break;
                 case 46638:         // Brutallus SWP - closes door
                     gameObjTarget->ResetDoorOrButton();
                     break;
                 default:
                     if (m_caster)
-                        gameObjTarget->Use(m_caster);
+                        gameObjTarget->Use(m_caster, m_spellInfo);
                     break;
             }
             break;
@@ -7532,19 +7464,6 @@ void Spell::EffectActivateObject(SpellEffectIndex effIdx)
                     gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
                     break;
                 }
-                case 40176:         // Simon Game pre-game Begin, blue
-                case 40177:         // Simon Game pre-game Begin, green
-                case 40178:         // Simon Game pre-game Begin, red
-                case 40179:         // Simon Game pre-game Begin, yellow
-                case 40283:         // Simon Game END, blue
-                case 40284:         // Simon Game END, green
-                case 40285:         // Simon Game END, red
-                case 40286:         // Simon Game END, yellow
-                case 40494:         // Simon Game, switched ON
-                case 40495:         // Simon Game, switched OFF
-                case 40512:         // Simon Game, switch...disable Off switch
-                    gameObjTarget->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
-                    break;
                 case 40632:         // Summon Gezzarak the Huntress
                 case 40640:         // Summon Karrog
                 case 40642:         // Summon Darkscreecher Akkarai
@@ -9034,54 +8953,4 @@ void Spell::EffectTeleportGraveyard(SpellEffectIndex /*eff_idx*/)
 
     Player* player = static_cast<Player*>(unitTarget);
     player->RepopAtGraveyard();
-}
-
-uint32 Spell::GetUsableHealthStoneItemType(Unit* target)
-{
-    if (!target || target->GetTypeId() != TYPEID_PLAYER)
-        return 0;
-
-    uint32 itemtype = 0;
-    uint32 rank = 0;
-    Unit::AuraList const& mDummyAuras = target->GetAurasByType(SPELL_AURA_DUMMY);
-    for (auto mDummyAura : mDummyAuras)
-    {
-        if (mDummyAura->GetId() == 18692)
-        {
-            rank = 1;
-            break;
-        }
-        if (mDummyAura->GetId() == 18693)
-        {
-            rank = 2;
-            break;
-        }
-    }
-
-    static uint32 const itypes[6][3] =
-    {
-        { 5512, 19004, 19005},              // Minor Healthstone
-        { 5511, 19006, 19007},              // Lesser Healthstone
-        { 5509, 19008, 19009},              // Healthstone
-        { 5510, 19010, 19011},              // Greater Healthstone
-        { 9421, 19012, 19013},              // Major Healthstone
-        {22103, 22104, 22105}               // Master Healthstone
-    };
-
-    switch (m_spellInfo->Id)
-    {
-    case  6201:
-        itemtype = itypes[0][rank]; break; // Minor Healthstone
-    case  6202:
-        itemtype = itypes[1][rank]; break; // Lesser Healthstone
-    case  5699:
-        itemtype = itypes[2][rank]; break; // Healthstone
-    case 11729:
-        itemtype = itypes[3][rank]; break; // Greater Healthstone
-    case 11730:
-        itemtype = itypes[4][rank]; break; // Major Healthstone
-    case 27230:
-        itemtype = itypes[5][rank]; break; // Master Healthstone
-    }
-    return itemtype;
 }
